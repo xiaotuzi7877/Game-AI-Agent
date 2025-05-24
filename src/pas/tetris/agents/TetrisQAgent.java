@@ -21,9 +21,9 @@ import edu.bu.pas.tetris.utils.Pair;
 
 public class TetrisQAgent extends QAgent {
     private Random random;
-    private static final double INITIAL_EXPLORATION_PROB = 0.7;
-    private static final double MIN_EXPLORATION_PROB = 0.05;
-    private static final double EXPLORATION_DECAY = 0.995;
+    private static final double INITIAL_EXPLORATION_PROB = 0.9;
+    private static final double MIN_EXPLORATION_PROB = 0.03;
+    private static final double EXPLORATION_DECAY = 0.95;
 
     public TetrisQAgent(String name) {
         super(name);
@@ -109,7 +109,7 @@ public class TetrisQAgent extends QAgent {
 
         for (Mino mino : minos) {
             double score = evaluateMino(board, mino);
-            score += random.nextDouble() * 4.0; //     
+            score += random.nextDouble() * 4.0;
             if (score > bestScore) {
                 bestScore = score;
                 bestMino = mino;
@@ -149,13 +149,13 @@ public class TetrisQAgent extends QAgent {
     public double getReward(final GameView game) {
         double score = game.getScoreThisTurn();
         Board board = game.getBoard();
-        double heightPenalty = -0.4 * calculateMaxHeight(board); //     
-        double holePenalty = -0.4 * countHoles(board); //     
-        double lineReward = score > 0 ? 550.0 * score : 0; //   500   1000   1500   2000
-        double gameOverPenalty = game.didAgentLose() ? -15.0 : 0; //     
-        double survivalReward = 2.5; //     
-        double bottomRowCompletionReward = calculateBottomRowCompletion(board) * 4.0; //     
-        double tspinReward = detectTSpin(board, game) ? 50.0 : 0.0; //   T-spin
+        double heightPenalty = -0.4 * calculateMaxHeight(board); 
+        double holePenalty = -0.4 * countHoles(board); 
+        double lineReward = score > 0 ? 500.0 * score : 0; 
+        double gameOverPenalty = game.didAgentLose() ? -15.0 : 0; 
+        double survivalReward = 2; 
+        double bottomRowCompletionReward = calculateBottomRowCompletion(board) * 4.0; 
+                double tspinReward = detectTSpin(board, game) ? 50.0 : 0.0; 
 
         double totalReward = lineReward + heightPenalty + holePenalty + gameOverPenalty + survivalReward + bottomRowCompletionReward + tspinReward;
         if (score > 0) {
@@ -320,7 +320,7 @@ public class TetrisQAgent extends QAgent {
         double score = 0;
         Block[] blocks = mino.getBlocks();
 
-       
+
         int[] rowCounts = new int[Board.NUM_ROWS];
         for (Block block : blocks) {
             int y = block.getCoordinate().getYCoordinate();
@@ -342,7 +342,6 @@ public class TetrisQAgent extends QAgent {
             }
         }
 
-     
         int filledHoles = 0;
         for (Block block : blocks) {
             int x = block.getCoordinate().getXCoordinate();
@@ -359,7 +358,6 @@ public class TetrisQAgent extends QAgent {
         }
         score += 20.0 * filledHoles;
 
-       
         int neighbors = 0;
         for (Block block : blocks) {
             int x = block.getCoordinate().getXCoordinate();
@@ -379,11 +377,10 @@ public class TetrisQAgent extends QAgent {
         }
         score += 5.0 * neighbors;
 
-        
         double avgHeight = calculateMinoHeight(mino);
         score -= 3.0 * avgHeight;
 
-        
+       
         int[] colHeights = new int[Board.NUM_COLS];
         for (int col = 0; col < Board.NUM_COLS; col++) {
             for (int row = 0; row < Board.NUM_ROWS; row++) {
@@ -404,16 +401,14 @@ public class TetrisQAgent extends QAgent {
             }
         }
 
-        
         score -= 0.5 * calculateColumnBalance(board);
 
-    
+
         if (mino.getType() == Mino.MinoType.T) {
             double rotationScore = encodeRotationState(mino);
             score += 15.0 * rotationScore;
         }
 
-       
         score += random.nextDouble() * 4.0;
 
         return score;
